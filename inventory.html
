@@ -1,0 +1,12 @@
+{% if items==[]%}
+<p> There are currently no items in the catalog. </p>
+{% else %}
+<div class="product">
+	{% for item in items %}
+	<a href={{url_for('product', product_id = item_id)}}>
+		<p>{{item.photo}}</p> 
+		<img scr={{item.photo}} height="250" >
+	</a>
+</div>
+	{% endfor %} 
+{% endif %}
