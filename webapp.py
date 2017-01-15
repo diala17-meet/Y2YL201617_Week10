@@ -64,16 +64,46 @@ def product(product_id):
 
 @app.route("/product/<int:product_id>/addToCart", methods = ['POST'])
 def addToCart(product_id):
-	return "To be implemented"
+	if 'id' not in login_session:
+		flash("you must be logged in to perform this action")
+		return redirect(url_for('login'))
+		quantity = request.form['quantity']
+		product = session.query(product).filter_by(id=product_id).one()
+		shoppingCart = session.query(shoppingCart).filter_by(customer_id=login_sessin['id']).one()
+		if product.name in [item.prodct.name for item in shoppingCart.products]:
+			assoc = session.query(shoppingCartassociation).filter_by(shoppingCart=shoppingCart) \
+				.filter_by(product=product).one()
+			assoc.quantity = int(assoc.quantity)+ int(quantity)
+			flash("successfuly added to shopping Cart")
+			return redirect(url_for('shoppingCart'))
+		else:
+			a = shoppingCartAssociation(product=product, quantity=quantity)
+			shoppingCart.products.append(a)
+			session.add_all([a, product, shoppingCart])
+			session.commit()
+			flash("Successfully added to shopping Cart")
+			return redirect(url_for('shoppingCart'))
 
 @app.route("/shoppingCart")
 def shoppingCart():
-	return "To be implemented"
+	if 'id' not in login_session:
+		flash("you must be logged in to perform this action")
+		return redirect(url_for('login'))
+	shoppingCart = session.query(shoppingCart).filter_by(customer_id=login_session['id']).one()
+	return render_template('shoppingCart.html', shoppingCart=shoppingCart)
 
 @app.route("/removeFromCart/<int:product_id>", methods = ['POST'])
 def removeFromCart(product_id):
-	return "To be implmented"
-
+	if 'id' not in login_session:
+		flash("you must be logged in to perform this action")
+		return redirect(url_for('login'))
+	shoppingCart = session.query(ShoppingCart).filter_by(customer_id=login_session['id']).one()
+	association = session.query(ShoppingCartAssociation).filter_by(shoppingCart=shoppingCart).filter_by(product_id=product_id).one()
+	session.delete(association)
+	session.commit()
+	flash("Item deleted succesfully")
+	return redirect(url_for('shoppingCart'))
+    
 @app.route("/updateQuantity/<int:product_id>", methods = ['POST'])
 def updateQuantity(product_id):
 	return "To be implemented"
